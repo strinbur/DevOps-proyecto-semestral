@@ -11,7 +11,7 @@ export const PruebaCards = () => {
     <section>
       <div className="flex justify-center">
         <CardComponent
-          title="Tabla de compras realizadas 📦"
+          title="Tabla de consultas de compras realizadas"
           description="Revisa las últimas oc realizadas para generar su despacho"
           buttonText="Consultar"
           onClick={() => {
