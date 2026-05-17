@@ -7,8 +7,7 @@ export const TableDespachos = () => {
   const [despachos, setDespachos] = useState([]);
 
   const despacho = async () => {
-    // 🟢 CORRECCIÓN DEVOPS: Se remueve la IP estática local y se reemplaza por ruta relativa.
-    // El navegador consultará a la IP de la EC2-Frontend y Nginx derivará al Backend.
+    // 🟢 CORRECCIÓN DEVOPS: Ruta relativa para operar nativamente bajo el Reverse Proxy de Nginx
     await axios
       .get("/api/v1/despachos", {
         headers: {
@@ -22,7 +21,6 @@ export const TableDespachos = () => {
       });
   };
 
-  // Llamada a la función para obtener los datos cuando el componente se monta
   useEffect(() => {
     despacho();
   }, []);
@@ -39,58 +37,54 @@ export const TableDespachos = () => {
     <>
       <section className="grid text-center grid-cols-12 mb-8">
         <div className="col-span-12 flex justify-center">
-          <div className="col-span-10 p-2 bg-white border border-gray-200 rounded-lg shadow dark:bg-white h-full overflow-hidden">
-            <table className="table-fixed">
+          <div className="col-span-10 p-2 bg-white border border-gray-200 rounded-lg shadow h-full overflow-hidden">
+            <table className="table-auto w-full"> {/* 🟢 CORRECCIÓN VISUAL: table-auto para prevenir desalineamientos */}
               <thead>
-                <tr className="py-10">
-                  <th className="pr-10">Orden de despacho</th>
-                  <th className="pr-10">Orden de compra</th>
-                  <th className="pr-10">Dirección de entrega</th>
-                  <th className="pr-10">Fecha despacho</th>
-                  <th className="pr-10">Patente Camión</th>
-                  <th className="pr-10">Entregado</th>
-                  <th className="pr-10">Intentos de entrega</th>
+                <tr className="border-b bg-slate-50 text-slate-700">
+                  <th className="p-3">Orden de despacho</th>
+                  <th className="p-3">Orden de compra</th>
+                  <th className="p-3">Dirección de entrega</th>
+                  <th className="p-3">Fecha despacho</th>
+                  <th className="p-3">Patente Camión</th>
+                  <th className="p-3">Estado</th>
+                  <th className="p-3">Intentos</th>
+                  <th className="p-3">Acciones</th> {/* 🟢 CORRECCIÓN SINTAXIS: Se añade la 8va cabecera faltante */}
                 </tr>
               </thead>
               <tbody>
-                {despachos.map((despacho) => (
-                  <tr key={despacho.idDespacho}>
-                    <td className="pr-10 py-10 items-center">{despacho.idDespacho}</td>
-                    <td className="pr-10 py-10  items-center">
-                      {despacho.idCompra}
-                    </td>
-                    <td className="pr-10 py-10  items-center">
-                      {despacho.direccionCompra}
-                    </td>
-                    <td className="pr-10 py-10  items-center">
-                      {despacho.fechaDespacho}
-                    </td>
-                    <td className="pr-10 py-10  items-center">
-                      {despacho.patenteCamion}
-                    </td>
-                    <td className="pr-10 py-10  items-center">
-                      {despacho.entregado
-                        ? "Despacho entregado"
-                        : "Despacho pendiente"}
-                    </td>
-                    <td className="pr-10 py-10  items-center">
-                      {despacho.intento}
-                    </td>
-                    <td>
-                      <button
-                        onClick={() => handleAbrirModal(despacho)}
-                        className="py-1 bg-orange-200 px-8 rounded-xl shadow-md hover:bg-orange-300/70 transition-all duration-300 "
-                      >
-                        Cerrar despacho
-                      </button>
-                    </td>
-                  </tr>
-                ))}
+                {despachos
+                  // 🟢 CORRECCIÓN LÓGICA: Filtramos para mostrar SÓLO los despachos pendientes (despachado === false)
+                  // Cuando pases un pedido a True en el formulario, este desaparecerá automáticamente de la vista
+                  .filter((item) => !item.despachado)
+                  .map((despacho) => (
+                    <tr key={despacho.idDespacho} className="border-b hover:bg-slate-50 transition-colors">
+                      <td className="p-3 font-semibold text-teal-600">{despacho.idDespacho}</td>
+                      <td className="p-3">{despacho.idCompra}</td>
+                      <td className="p-3 text-sm max-w-xs truncate">{despacho.direccionCompra}</td>
+                      <td className="p-3 text-sm">{despacho.fechaDespacho}</td>
+                      <td className="p-3 font-mono">{despacho.patenteCamion}</td>
+                      <td className="p-3">
+                        <span className="px-2 py-1 text-xs font-semibold rounded-full bg-orange-100 text-orange-700">
+                          Pendiente
+                        </span>
+                      </td>
+                      <td className="p-3 font-semibold">{despacho.intento}</td>
+                      <td className="p-3">
+                        <button
+                          onClick={() => handleAbrirModal(despacho)}
+                          className="py-1 bg-orange-200 px-6 rounded-xl shadow-sm hover:bg-orange-300 transition-all duration-300 text-sm font-medium"
+                        >
+                          Cerrar despacho
+                        </button>
+                      </td>
+                    </tr>
+                  ))}
               </tbody>
             </table>
           </div>
         </div>
       </section>
+
       <Modal
         onClose={() => {
           setOpenModal(false);
@@ -101,7 +95,6 @@ export const TableDespachos = () => {
           <FormCierreDespacho
             despacho={despachoSeleccionado}
             onClose={() => {
-              // onclose es un prop que pasa funciones al modal con el form abierto, por ende al cerrarse, se ejecutan esas 2 funciones
               setOpenModal(false);
               despacho();
             }}
