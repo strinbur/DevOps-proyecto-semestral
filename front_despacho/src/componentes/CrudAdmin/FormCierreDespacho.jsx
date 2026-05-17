@@ -15,7 +15,7 @@ export const FormCierreDespacho = ({ despacho, onClose }) => {
     console.log("Datos del formulario:", jsonData);
 
     try {
-      // 🟢 CORRECCIÓN DEVOPS: Se eliminó la IP hardcodeada y se usa una ruta relativa.
+      //Se eliminó la IP hardcodeada y se usa una ruta relativa.
       // Nginx en la EC2 Frontend se encargará de redirigir esto internamente al Backend.
       await axios.put(
         `/api/v1/despachos/${despacho.idDespacho}`,
