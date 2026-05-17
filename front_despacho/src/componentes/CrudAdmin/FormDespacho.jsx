@@ -24,7 +24,7 @@ export const FormDespacho = ({ venta, onClose }) => {
     console.log("Datos del formulario:", jsonData);
 
     try {
-      // 🟢 CORRECCIÓN DEVOPS: Se remueve la IP estática local y se reemplaza por ruta relativa
+      //Se remueve la IP estática local y se reemplaza por ruta relativa
       await axios.put(
         `/api/v1/ventas/${venta.idVenta}`,
         jsonDataSales,
@@ -36,7 +36,7 @@ export const FormDespacho = ({ venta, onClose }) => {
         }
       );
 
-      // 🟢 CORRECCIÓN DEVOPS: Se remueve la IP estática local y se reemplaza por ruta relativa
+      //Se remueve la IP estática local y se reemplaza por ruta relativa
       await axios.post("/api/v1/despachos", jsonData, {
         headers: {
           'Content-Type': 'application/json',
