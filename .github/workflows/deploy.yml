@@ -13,17 +13,17 @@ jobs:
       - name: Checkout code
         uses: actions/checkout@v4
 
-      - name: Build Docker images
-        run: docker compose build
-
       - name: Login to DockerHub
         uses: docker/login-action@v3
         with:
           username: ${{ secrets.DOCKERHUB_USERNAME }}
           password: ${{ secrets.DOCKERHUB_TOKEN }}
 
-      - name: Push images (optional si usas DockerHub)
-        run: echo "si usas registry aquí irían los push"
+      - name: Build Docker images
+        run: docker compose build
+
+      - name: Push images
+        run: docker compose push
 
       - name: Deploy to EC2 via SSH
         uses: appleboy/ssh-action@v1.0.3
@@ -35,4 +35,5 @@ jobs:
             cd proyecto
             git pull origin deploy
             docker compose down
+            docker compose pull
             docker compose up -d --build
