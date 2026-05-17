@@ -24,6 +24,9 @@ RUN rm -rf /usr/share/nginx/html/*
 # Copiar build generado
 COPY --from=builder /app/dist /usr/share/nginx/html
 
+# Copiar configuración de proxy reverso de Nginx
+COPY default.conf /etc/nginx/conf.d/default.conf
+
 # Exponer puerto
 EXPOSE 80
 

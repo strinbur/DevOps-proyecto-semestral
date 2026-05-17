@@ -1,5 +1,6 @@
-services:
+version: '3.8'
 
+services:
   mysql:
     image: mysql:8.0
     container_name: mysql-db
@@ -9,10 +10,11 @@ services:
       MYSQL_DATABASE: devopsdb
     ports:
       - "3307:3306"
+    volumes:
+      - mysql_data:/var/lib/mysql # <- ¡REQUERIMIENTO 2: PERSISTENCIA!
     networks:
       - app-network
     command: --default-authentication-plugin=mysql_native_password
-
     healthcheck:
       test: ["CMD-SHELL", "mysqladmin ping -h localhost -uroot -proot || exit 1"]
       interval: 10s
@@ -21,6 +23,7 @@ services:
       start_period: 20s
 
   ventas:
+    image: ${DOCKERHUB_USERNAME}/ventas-api:latest # <- Necesario para el push del pipeline
     build:
       context: ./back-Ventas_SpringBoot/Springboot-API-REST
     container_name: ventas-api
@@ -40,6 +43,7 @@ services:
       - app-network
 
   despachos:
+    image: ${DOCKERHUB_USERNAME}/despachos-api:latest # <- Necesario para el push del pipeline
     build:
       context: ./back-Despachos_SpringBoot/Springboot-API-REST-DESPACHO
     container_name: despachos-api
@@ -59,6 +63,7 @@ services:
       - app-network
 
   frontend:
+    image: ${DOCKERHUB_USERNAME}/frontend-app:latest # <- Necesario para el push del pipeline
     build:
       context: ./front_despacho
     container_name: frontend-app
@@ -70,6 +75,9 @@ services:
       - "80:80"
     networks:
       - app-network
+
+volumes:
+  mysql_data:
 
 networks:
   app-network:

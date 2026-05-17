@@ -15,14 +15,16 @@ export const FormCierreDespacho = ({ despacho, onClose }) => {
     console.log("Datos del formulario:", jsonData);
 
     try {
+      // 🟢 CORRECCIÓN DEVOPS: Se eliminó la IP hardcodeada y se usa una ruta relativa.
+      // Nginx en la EC2 Frontend se encargará de redirigir esto internamente al Backend.
       await axios.put(
-        `http://192.168.320/api/v1/despachos/${despacho.idDespacho}`,
+        `/api/v1/despachos/${despacho.idDespacho}`,
         jsonData,
         {
-          headers:{
+          headers: {
             'Content-Type': 'application/json',
             'Accept': 'application/json'
-      }
+          }
         }
       );
       Swal.fire({

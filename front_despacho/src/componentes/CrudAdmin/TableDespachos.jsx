@@ -7,11 +7,13 @@ export const TableDespachos = () => {
   const [despachos, setDespachos] = useState([]);
 
   const despacho = async () => {
+    // 🟢 CORRECCIÓN DEVOPS: Se remueve la IP estática local y se reemplaza por ruta relativa.
+    // El navegador consultará a la IP de la EC2-Frontend y Nginx derivará al Backend.
     await axios
-      .get("http://192.168.3.20/api/v1/despachos", {
-        headers:{
-              'Content-Type': 'application/json',
-              'Accept': 'application/json'
+      .get("/api/v1/despachos", {
+        headers: {
+          'Content-Type': 'application/json',
+          'Accept': 'application/json'
         }
       })
       .then((response) => {
@@ -19,6 +21,7 @@ export const TableDespachos = () => {
         setDespachos(response.data);
       });
   };
+
   // Llamada a la función para obtener los datos cuando el componente se monta
   useEffect(() => {
     despacho();
@@ -50,9 +53,7 @@ export const TableDespachos = () => {
                 </tr>
               </thead>
               <tbody>
-                {despachos
-               
-                .map((despacho) => (
+                {despachos.map((despacho) => (
                   <tr key={despacho.idDespacho}>
                     <td className="pr-10 py-10 items-center">{despacho.idDespacho}</td>
                     <td className="pr-10 py-10  items-center">
@@ -100,8 +101,9 @@ export const TableDespachos = () => {
           <FormCierreDespacho
             despacho={despachoSeleccionado}
             onClose={() => {
-              //onclose es un prop que pasa funciones al modal con el form abierto, por ende al cerrarse, se ejecutan esas 2 funciones
-              setOpenModal(false), despacho();
+              // onclose es un prop que pasa funciones al modal con el form abierto, por ende al cerrarse, se ejecutan esas 2 funciones
+              setOpenModal(false);
+              despacho();
             }}
           />
         )}

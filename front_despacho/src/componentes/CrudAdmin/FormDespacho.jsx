@@ -24,22 +24,26 @@ export const FormDespacho = ({ venta, onClose }) => {
     console.log("Datos del formulario:", jsonData);
 
     try {
+      // 🟢 CORRECCIÓN DEVOPS: Se remueve la IP estática local y se reemplaza por ruta relativa
       await axios.put(
-        `http://192.168.30/api/v1/ventas/${venta.idVenta}`,
+        `/api/v1/ventas/${venta.idVenta}`,
         jsonDataSales,
         {
-          headers:{
+          headers: {
             'Content-Type': 'application/json',
             'Accept': 'application/json'
-      }
+          }
         }
       );
-      await axios.post("http://192.168.320/api/v1/despachos", jsonData, {
-        headers:{
+
+      // 🟢 CORRECCIÓN DEVOPS: Se remueve la IP estática local y se reemplaza por ruta relativa
+      await axios.post("/api/v1/despachos", jsonData, {
+        headers: {
           'Content-Type': 'application/json',
           'Accept': 'application/json'
-    }
+        }
       });
+
       Swal.fire({
         title: "Despacho registrado 🛻!",
         text: "El despacho ha sido generado con éxito en la base de datos",
@@ -51,6 +55,7 @@ export const FormDespacho = ({ venta, onClose }) => {
     }
     onClose();
   };
+
   return (
     <>
       <form

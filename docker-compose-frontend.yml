@@ -1,0 +1,11 @@
+version: '3.8'
+
+services:
+  frontend:
+    image: ${DOCKERHUB_USERNAME}/frontend-app:latest
+    build:
+      context: ./front_despacho
+    container_name: frontend-app
+    restart: always
+    ports:
+      - "80:80"
