@@ -18,7 +18,7 @@ jobs:
           username: ${{ secrets.DOCKERHUB_USERNAME }}
           password: ${{ secrets.DOCKERHUB_TOKEN }}
 
-      # 🏗️ Etapa de Compilación Automatizada en GitHub (No en las EC2)
+      # Etapa de Compilación Automatizada en GitHub
       - name: Set up Docker Buildx
         uses: docker/setup-buildx-action@v3
 
@@ -50,12 +50,12 @@ jobs:
       - name: Deploy Stack via Chain-SSH
         uses: appleboy/ssh-action@v1.0.3
         with:
-          host: ${{ secrets.EC2_HOST }} # IP Pública de la EC2 Frontend (54.164.200.186)
+          host: ${{ secrets.EC2_HOST }} # IP Pública de la EC2 Frontend
           username: ${{ secrets.EC2_USER }} # ec2-user
           key: ${{ secrets.EC2_SSH_KEY }} # Contenido de tu clave.pem
           script: |
             # =========================================================================
-            # 🌐 1. ACTUALIZAR INSTANCIA FRONTEND (PÚBLICA)
+            # 🌐 1. ACTUALIZAR INSTANCIA FRONTEND
             # =========================================================================
             cd ~/proyecto
             git pull origin deploy
@@ -66,7 +66,7 @@ jobs:
             DOCKERHUB_USERNAME=${{ secrets.DOCKERHUB_USERNAME }} docker compose -f docker-compose-frontend.yml up -d
 
             # =========================================================================
-            # ⚙️ 2. ACTUALIZAR INSTANCIA BACKEND (PRIVADA VÍA SALTO SSH INTERNAL)
+            #  2. ACTUALIZAR INSTANCIA BACKEND PRIVADA VÍA SSH
             # =========================================================================
             ssh -o StrictHostKeyChecking=no -i ~/clave.pem ec2-user@10.0.135.9 "
               cd ~/proyecto && \
@@ -77,7 +77,7 @@ jobs:
             "
 
             # =========================================================================
-            # 🗄️ 3. ACTUALIZAR INSTANCIA DATABASE (PRIVADA VÍA DOBLE SALTO SSH)
+            # 3. ACTUALIZAR INSTANCIA DATABASE PRIVADA VÍA SSH
             # =========================================================================
             ssh -o StrictHostKeyChecking=no -i ~/clave.pem ec2-user@10.0.135.9 "
               ssh -o StrictHostKeyChecking=no -i ~/clave.pem ec2-user@10.0.159.40 \"
