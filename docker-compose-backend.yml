@@ -2,13 +2,11 @@ version: '3.8'
 
 services:
   ventas:
-    image: ${DOCKERHUB_USERNAME}/ventas-api:latest
-    build:
-      context: ./back-Ventas_SpringBoot/Springboot-API-REST
+    image: 068461358306.dkr.ecr.us-east-1.amazonaws.com/back-ventas:latest
     container_name: ventas-api
     restart: always
     environment:
-      DB_ENDPOINT: 10.0.159.40  # <-- ¡IP PRIVADA DE LA EC2-DATABASE!
+      DB_ENDPOINT: 10.0.154.139
       DB_PORT: 3306
       DB_NAME: devopsdb
       DB_USERNAME: root
@@ -17,13 +15,11 @@ services:
       - "8080:8080"
 
   despachos:
-    image: ${DOCKERHUB_USERNAME}/despachos-api:latest
-    build:
-      context: ./back-Despachos_SpringBoot/Springboot-API-REST-DESPACHO
+    image: 068461358306.dkr.ecr.us-east-1.amazonaws.com/back-despachos:latest
     container_name: despachos-api
     restart: always
     environment:
-      DB_ENDPOINT: 10.0.159.40  # <-- ¡IP PRIVADA DE LA EC2-DATABASE!
+      DB_ENDPOINT: 10.0.154.139
       DB_PORT: 3306
       DB_NAME: devopsdb
       DB_USERNAME: root
