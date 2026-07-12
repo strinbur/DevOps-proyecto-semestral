@@ -19,7 +19,7 @@ spec:
         - containerPort: 8080
         env:
         - name: SPRING_DATASOURCE_URL
-          value: "jdbc:mysql://mysql-service:3306/nombre_tu_base_datos" # Asegúrate de que el nombre de la DB sea correcto
+          value: "jdbc:mysql://mysql-service:3306/tienda_db"
         - name: SPRING_DATASOURCE_USERNAME
           value: "root"
         - name: SPRING_DATASOURCE_PASSWORD
