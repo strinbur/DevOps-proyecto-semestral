@@ -5,6 +5,10 @@ on:
     branches:
       - main
 
+env:
+  AWS_REGION: us-east-1
+  ECR_REGISTRY: 068461358306.dkr.ecr.us-east-1.amazonaws.com
+
 jobs:
   build-and-push:
     runs-on: ubuntu-latest
@@ -12,13 +16,17 @@ jobs:
       - name: Checkout code
         uses: actions/checkout@v4
 
-      - name: Login to DockerHub
-        uses: docker/login-action@v3
+      - name: Configure AWS credentials
+        uses: aws-actions/configure-aws-credentials@v4
         with:
-          username: ${{ secrets.DOCKERHUB_USERNAME }}
-          password: ${{ secrets.DOCKERHUB_TOKEN }}
+          aws-access-key-id: ${{ secrets.AWS_ACCESS_KEY_ID }}
+          aws-secret-access-key: ${{ secrets.AWS_SECRET_ACCESS_KEY }}
+          aws-region: ${{ env.AWS_REGION }}
 
-      # Etapa de Compilación Automatizada en GitHub
+      - name: Login to Amazon ECR
+        id: login-ecr
+        uses: aws-actions/amazon-ecr-login@v2
+
       - name: Set up Docker Buildx
         uses: docker/setup-buildx-action@v3
 
@@ -27,59 +35,66 @@ jobs:
         with:
           context: ./front_despacho
           push: true
-          tags: ${{ secrets.DOCKERHUB_USERNAME }}/frontend-app:latest
+          tags: ${{ env.ECR_REGISTRY }}/front:latest
 
       - name: Build and Push Ventas API
         uses: docker/build-push-action@v5
         with:
           context: ./back-Ventas_SpringBoot/Springboot-API-REST
           push: true
-          tags: ${{ secrets.DOCKERHUB_USERNAME }}/ventas-api:latest
+          tags: ${{ env.ECR_REGISTRY }}/back-ventas:latest
 
       - name: Build and Push Despachos API
         uses: docker/build-push-action@v5
         with:
           context: ./back-Despachos_SpringBoot/Springboot-API-REST-DESPACHO
           push: true
-          tags: ${{ secrets.DOCKERHUB_USERNAME }}/despachos-api:latest
+          tags: ${{ env.ECR_REGISTRY }}/back-despachos:latest
 
   deploy-infrastructure:
     needs: build-and-push
     runs-on: ubuntu-latest
     steps:
+      - name: Configure AWS credentials
+        uses: aws-actions/configure-aws-credentials@v4
+        with:
+          aws-access-key-id: ${{ secrets.AWS_ACCESS_KEY_ID }}
+          aws-secret-access-key: ${{ secrets.AWS_SECRET_ACCESS_KEY }}
+          aws-region: ${{ env.AWS_REGION }}
+
+      - name: Get ECR login password
+        id: ecr-password
+        run: |
+          PASSWORD=$(aws ecr get-login-password --region ${{ env.AWS_REGION }})
+          echo "::add-mask::$PASSWORD"
+          echo "password=$PASSWORD" >> "$GITHUB_OUTPUT"
+
       - name: Deploy Stack via Chain-SSH
         uses: appleboy/ssh-action@v1.0.3
         with:
-          host: ${{ secrets.EC2_HOST }} # IP Pública de la EC2 Frontend
-          username: ${{ secrets.EC2_USER }} # ec2-user
-          key: ${{ secrets.EC2_SSH_KEY }} # Contenido de tu clave.pem
-          debug: true # <--- ¡MÁSTIL DE DEBUG AGREGADO AQUÍ!
+          host: ${{ secrets.EC2_HOST }}
+          username: ${{ secrets.EC2_USER }}
+          key: ${{ secrets.EC2_SSH_KEY }}
+          debug: true
           script: |
-            # =========================================================================
-            # 🌐 1. ACTUALIZAR INSTANCIA FRONTEND
-            # =========================================================================
             cd ~/proyecto
             git pull origin main
-            
-            # Detener y descargar la imagen limpia desde Docker Hub
-            DOCKERHUB_USERNAME=${{ secrets.DOCKERHUB_USERNAME }} docker compose -f docker-compose-frontend.yml down
-            DOCKERHUB_USERNAME=${{ secrets.DOCKERHUB_USERNAME }} docker compose -f docker-compose-frontend.yml pull
-            DOCKERHUB_USERNAME=${{ secrets.DOCKERHUB_USERNAME }} docker compose -f docker-compose-frontend.yml up -d
 
-            # =========================================================================
-            # ⚙️ 2. ACTUALIZAR INSTANCIA BACKEND PRIVADA VÍA SSH
-            # =========================================================================
+            echo "${{ steps.ecr-password.outputs.password }}" | docker login --username AWS --password-stdin ${{ env.ECR_REGISTRY }}
+
+            docker compose -f docker-compose-frontend.yml down
+            docker compose -f docker-compose-frontend.yml pull
+            docker compose -f docker-compose-frontend.yml up -d
+
             ssh -o StrictHostKeyChecking=no -i ~/clave.pem ec2-user@10.0.133.176 "
               cd ~/proyecto && \
               git pull origin main && \
-              DOCKERHUB_USERNAME=${{ secrets.DOCKERHUB_USERNAME }} docker compose -f docker-compose-backend.yml down && \
-              DOCKERHUB_USERNAME=${{ secrets.DOCKERHUB_USERNAME }} docker compose -f docker-compose-backend.yml pull && \
-              DOCKERHUB_USERNAME=${{ secrets.DOCKERHUB_USERNAME }} docker compose -f docker-compose-backend.yml up -d
+              echo '${{ steps.ecr-password.outputs.password }}' | docker login --username AWS --password-stdin ${{ env.ECR_REGISTRY }} && \
+              docker compose -f docker-compose-backend.yml down && \
+              docker compose -f docker-compose-backend.yml pull && \
+              docker compose -f docker-compose-backend.yml up -d
             "
 
-            # =========================================================================
-            # 🗄️ 3. ACTUALIZAR INSTANCIA DATABASE PRIVADA VÍA SSH (CONEXIÓN DIRECTA)
-            # =========================================================================
             ssh -o StrictHostKeyChecking=no -i ~/clave.pem ec2-user@10.0.154.139 "
               cd ~ && \
               docker compose down && \
