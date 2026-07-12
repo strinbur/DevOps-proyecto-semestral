@@ -3,7 +3,7 @@ name: Deploy DevOps Innovatech
 on:
   push:
     branches:
-      - deploy
+      - main
 
 jobs:
   build-and-push:
@@ -58,7 +58,7 @@ jobs:
             # 🌐 1. ACTUALIZAR INSTANCIA FRONTEND
             # =========================================================================
             cd ~/proyecto
-            git pull origin deploy
+            git pull origin main
             
             # Detener y descargar la imagen limpia desde Docker Hub
             DOCKERHUB_USERNAME=${{ secrets.DOCKERHUB_USERNAME }} docker compose -f docker-compose-frontend.yml down
@@ -70,7 +70,7 @@ jobs:
             # =========================================================================
             ssh -o StrictHostKeyChecking=no -i ~/clave.pem ec2-user@10.0.135.9 "
               cd ~/proyecto && \
-              git pull origin deploy && \
+              git pull origin main && \
               DOCKERHUB_USERNAME=${{ secrets.DOCKERHUB_USERNAME }} docker compose -f docker-compose-backend.yml down && \
               DOCKERHUB_USERNAME=${{ secrets.DOCKERHUB_USERNAME }} docker compose -f docker-compose-backend.yml pull && \
               DOCKERHUB_USERNAME=${{ secrets.DOCKERHUB_USERNAME }} docker compose -f docker-compose-backend.yml up -d
