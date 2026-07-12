@@ -1,0 +1,29 @@
+apiVersion: apps/v1
+kind: Deployment
+metadata:
+  name: despachos-deployment
+spec:
+  replicas: 1
+  selector:
+    matchLabels:
+      app: despachos
+  template:
+    metadata:
+      labels:
+        app: despachos
+    spec:
+      containers:
+      - name: despachos
+        image: 068461358306.dkr.ecr.us-east-1.amazonaws.com/back-despachos:1ddc4860a49d547fd69e9d6c253001d51335f417
+        ports:
+        - containerPort: 8080
+        env:
+        - name: SPRING_DATASOURCE_URL
+          value: "jdbc:mysql://mysql-service:3306/tienda_db"
+        - name: SPRING_DATASOURCE_USERNAME
+          value: "root"
+        - name: SPRING_DATASOURCE_PASSWORD
+          valueFrom:
+            secretKeyRef:
+              name: mysql-secret
+              key: MYSQL_ROOT_PASSWORD

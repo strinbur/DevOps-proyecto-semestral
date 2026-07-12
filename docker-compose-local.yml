@@ -11,7 +11,7 @@ services:
     ports:
       - "3307:3306"
     volumes:
-      - mysql_data:/var/lib/mysql # <- ¡REQUERIMIENTO 2: PERSISTENCIA!
+      - mysql_data:/var/lib/mysql
     networks:
       - app-network
     command: --default-authentication-plugin=mysql_native_password
@@ -23,7 +23,7 @@ services:
       start_period: 20s
 
   ventas:
-    image: ${DOCKERHUB_USERNAME}/ventas-api:latest # <- Necesario para el push del pipeline
+    image: ${DOCKERHUB_USERNAME}/ventas-api:latest
     build:
       context: ./back-Ventas_SpringBoot/Springboot-API-REST
     container_name: ventas-api
@@ -43,7 +43,7 @@ services:
       - app-network
 
   despachos:
-    image: ${DOCKERHUB_USERNAME}/despachos-api:latest # <- Necesario para el push del pipeline
+    image: ${DOCKERHUB_USERNAME}/despachos-api:latest
     build:
       context: ./back-Despachos_SpringBoot/Springboot-API-REST-DESPACHO
     container_name: despachos-api
@@ -63,7 +63,7 @@ services:
       - app-network
 
   frontend:
-    image: ${DOCKERHUB_USERNAME}/frontend-app:latest # <- Necesario para el push del pipeline
+    image: ${DOCKERHUB_USERNAME}/frontend-app:latest
     build:
       context: ./front_despacho
     container_name: frontend-app

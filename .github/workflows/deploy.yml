@@ -77,12 +77,10 @@ jobs:
             "
 
             # =========================================================================
-            # 🗄️ 3. ACTUALIZAR INSTANCIA DATABASE PRIVADA VÍA SSH
+            # 🗄️ 3. ACTUALIZAR INSTANCIA DATABASE PRIVADA VÍA SSH (CONEXIÓN DIRECTA)
             # =========================================================================
-            ssh -o StrictHostKeyChecking=no -i ~/clave.pem ec2-user@10.0.133.176 "
-              ssh -o StrictHostKeyChecking=no -i ~/clave.pem ec2-user@10.0.154.139 \"
-                cd ~ && \
-                docker compose down && \
-                docker compose up -d
-              \"
+            ssh -o StrictHostKeyChecking=no -i ~/clave.pem ec2-user@10.0.154.139 "
+              cd ~ && \
+              docker compose down && \
+              docker compose up -d
             "
