@@ -1,0 +1,30 @@
+apiVersion: apps/v1
+kind: Deployment
+metadata:
+  name: despachos-deployment
+spec:
+  replicas: 1
+  selector:
+    matchLabels:
+      app: despachos
+  template:
+    metadata:
+      labels:
+        app: despachos
+    spec:
+      containers:
+      - name: despachos
+        image: nginx # Se reemplazará
+        ports:
+        - containerPort: 8080
+---
+apiVersion: v1
+kind: Service
+metadata:
+  name: despachos-service
+spec:
+  selector:
+    app: despachos
+  ports:
+  - port: 8080
+    targetPort: 8080

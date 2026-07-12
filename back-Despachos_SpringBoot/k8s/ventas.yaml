@@ -1,0 +1,30 @@
+apiVersion: apps/v1
+kind: Deployment
+metadata:
+  name: ventas-deployment
+spec:
+  replicas: 1
+  selector:
+    matchLabels:
+      app: ventas
+  template:
+    metadata:
+      labels:
+        app: ventas
+    spec:
+      containers:
+      - name: ventas
+        image: nginx # Se reemplazará
+        ports:
+        - containerPort: 8080
+---
+apiVersion: v1
+kind: Service
+metadata:
+  name: ventas-service
+spec:
+  selector:
+    app: ventas
+  ports:
+  - port: 8080
+    targetPort: 8080
