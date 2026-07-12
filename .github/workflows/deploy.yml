@@ -1,0 +1,61 @@
+name: Deploy DevOps Innovatech to EKS
+
+on:
+  push:
+    branches: [ "deploy" ]
+
+jobs:
+  deploy:
+    runs-on: ubuntu-latest
+    steps:
+      - name: Checkout code
+        uses: actions/checkout@v4
+
+      # 1. Autenticación con AWS
+      - name: Configure AWS credentials
+        uses: aws-actions/configure-aws-credentials@v4
+        with:
+          aws-access-key-id: ${{ secrets.AWS_ACCESS_KEY_ID }}
+          aws-secret-access-key: ${{ secrets.AWS_SECRET_ACCESS_KEY }}
+          aws-session-token: ${{ secrets.AWS_SESSION_TOKEN }}
+          aws-region: us-east-1
+
+      # 2. Login automático en Amazon ECR
+      - name: Login to Amazon ECR
+        id: login-ecr
+        uses: aws-actions/amazon-ecr-login@v2
+
+      # 3. Construir y subir imágenes a ECR
+      - name: Build and push images
+        env:
+          ECR_REGISTRY: ${{ steps.login-ecr.outputs.registry }}
+          IMAGE_TAG: ${{ github.sha }}
+        run: |
+          # Compilar y subir Frontend (Apunta al repo 'front')
+          docker build -t $ECR_REGISTRY/front:$IMAGE_TAG ./front_despacho
+          docker push $ECR_REGISTRY/front:$IMAGE_TAG
+          
+          # Compilar y subir Ventas (Apunta al repo 'back-ventas')
+          docker build -t $ECR_REGISTRY/back-ventas:$IMAGE_TAG ./back-Ventas_SpringBoot/Springboot-API-REST
+          docker push $ECR_REGISTRY/back-ventas:$IMAGE_TAG
+          
+          # Compilar y subir Despachos (Apunta al repo 'back-despachos')
+          docker build -t $ECR_REGISTRY/back-despachos:$IMAGE_TAG ./back-Despachos_SpringBoot/Springboot-API-REST-DESPACHO
+          docker push $ECR_REGISTRY/back-despachos:$IMAGE_TAG
+
+      # 4. Actualizar el clúster EKS
+      - name: Deploy to EKS
+        env:
+          ECR_REGISTRY: ${{ steps.login-ecr.outputs.registry }}
+          IMAGE_TAG: ${{ github.sha }}
+        run: |
+          # Conectar al clúster
+          aws eks update-kubeconfig --name EKS-Tienda --region us-east-1
+          
+          # Aplicar manifiestos
+          kubectl apply -f k8s/
+          
+          # Inyectar las imágenes recién subidas a los deployments usando los nombres reales
+          kubectl set image deployment/frontend-deployment frontend=$ECR_REGISTRY/front:$IMAGE_TAG
+          kubectl set image deployment/ventas-deployment ventas=$ECR_REGISTRY/back-ventas:$IMAGE_TAG
+          kubectl set image deployment/despachos-deployment despachos=$ECR_REGISTRY/back-despachos:$IMAGE_TAG
