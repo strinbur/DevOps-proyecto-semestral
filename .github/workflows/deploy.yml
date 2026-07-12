@@ -50,7 +50,7 @@ jobs:
       - name: Deploy Stack via Chain-SSH
         uses: appleboy/ssh-action@v1.0.3
         with:
-          host: ${{ secrets.EC2_HOST }} # IP Pública de la EC2 Frontend (54.164.200.186)
+          host: ${{ secrets.EC2_HOST }} # IP Pública de la EC2 Frontend
           username: ${{ secrets.EC2_USER }} # ec2-user
           key: ${{ secrets.EC2_SSH_KEY }} # Contenido de tu clave.pem
           script: |
@@ -68,7 +68,7 @@ jobs:
             # =========================================================================
             # ⚙️ 2. ACTUALIZAR INSTANCIA BACKEND PRIVADA VÍA SSH
             # =========================================================================
-            ssh -o StrictHostKeyChecking=no -i ~/clave.pem ec2-user@10.0.135.9 "
+            ssh -o StrictHostKeyChecking=no -i ~/clave.pem ec2-user@10.0.133.176 "
               cd ~/proyecto && \
               git pull origin main && \
               DOCKERHUB_USERNAME=${{ secrets.DOCKERHUB_USERNAME }} docker compose -f docker-compose-backend.yml down && \
@@ -79,8 +79,8 @@ jobs:
             # =========================================================================
             # 🗄️ 3. ACTUALIZAR INSTANCIA DATABASE PRIVADA VÍA SSH
             # =========================================================================
-            ssh -o StrictHostKeyChecking=no -i ~/clave.pem ec2-user@10.0.135.9 "
-              ssh -o StrictHostKeyChecking=no -i ~/clave.pem ec2-user@10.0.159.40 \"
+            ssh -o StrictHostKeyChecking=no -i ~/clave.pem ec2-user@10.0.133.176 "
+              ssh -o StrictHostKeyChecking=no -i ~/clave.pem ec2-user@10.0.154.139 \"
                 cd ~ && \
                 docker compose down && \
                 docker compose up -d
