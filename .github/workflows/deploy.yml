@@ -53,6 +53,7 @@ jobs:
           host: ${{ secrets.EC2_HOST }} # IP Pública de la EC2 Frontend
           username: ${{ secrets.EC2_USER }} # ec2-user
           key: ${{ secrets.EC2_SSH_KEY }} # Contenido de tu clave.pem
+          debug: true # <--- ¡MÁSTIL DE DEBUG AGREGADO AQUÍ!
           script: |
             # =========================================================================
             # 🌐 1. ACTUALIZAR INSTANCIA FRONTEND
